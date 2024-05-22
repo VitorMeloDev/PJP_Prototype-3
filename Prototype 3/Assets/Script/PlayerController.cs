@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody playerRb;
     private Animator playerAnim;
     private AudioSource playerAudio;
+    private GameManager gameManager;
     public ParticleSystem explosionParticle;
     public ParticleSystem dirtParticle;
     public AudioClip jumpSound, crashSound;
@@ -21,6 +23,7 @@ public class PlayerController : MonoBehaviour
         playerRb = GetComponent<Rigidbody>();
         playerAnim = GetComponent<Animator>();
         playerAudio = GetComponent<AudioSource>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();;
         Physics.gravity *= gravityModifier;
     }
 
@@ -34,7 +37,14 @@ public class PlayerController : MonoBehaviour
             playerAudio.PlayOneShot(jumpSound, 0.2f);
             dirtParticle.Stop();
             isOnGround = false;
+            gameManager.isGaming = false;            
         }
+    }
+
+    IEnumerator Restart()
+    {
+        yield return new WaitForSeconds(8f);
+        SceneManager.LoadScene(0);
     }
 
     void OnCollisionEnter(Collision other) 
@@ -52,7 +62,7 @@ public class PlayerController : MonoBehaviour
             dirtParticle.Stop();
             playerAnim.SetBool("Death_b", true);
             playerAnim.SetInteger("DeathType_int", 1);
-            Debug.Log("Game Over!");
+            StartCoroutine(Restart());
         }
     }
 }
